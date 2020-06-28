@@ -16,5 +16,10 @@ pipeline {
                 sh './upload_docker.sh $USER_CREDENTIALS_USR $USER_CREDENTIALS_PSW'
             }
         }
+        stage('Remove Unused docker image') {
+            steps {
+                sh 'docker image prune'
+            }
+        }
         }
     }
