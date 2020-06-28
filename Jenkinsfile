@@ -12,7 +12,7 @@ pipeline {
         }
         stage('Push to Docker Hub') {
             steps {
-                sh './upload_docker.sh $USER_CREDENTIALS_USR $USER_CREDENTIALS_PSW'
+                sh 'sudo ./upload_docker.sh $USER_CREDENTIALS_USR $USER_CREDENTIALS_PSW'
             }
         }
         }
