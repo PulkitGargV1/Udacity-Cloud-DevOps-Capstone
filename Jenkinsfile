@@ -21,7 +21,7 @@ pipeline {
 				withAWS(region:'us-east-1', credentials:'aws-user') {
 					sh '''
 						eksctl create cluster \
-						--name apicluster \
+						--name flaskapicluster \
 						--version 1.14 \
 						--nodegroup-name standard-workers \
 						--node-type t2.small \
@@ -42,7 +42,7 @@ pipeline {
 			steps {
 				withAWS(region:'us-east-1', credentials:'aws-user') {
 					sh '''
-						aws eks --region us-east-1 update-kubeconfig --name apicluster
+						aws eks --region us-east-1 update-kubeconfig --name flaskapicluster
 					'''
 				}
 			}
