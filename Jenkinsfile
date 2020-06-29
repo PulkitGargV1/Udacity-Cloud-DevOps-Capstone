@@ -16,64 +16,39 @@ pipeline {
                 sh './upload_docker.sh $USER_CREDENTIALS_USR $USER_CREDENTIALS_PSW'
             }
         }
-	
-	stage('Set Current kubectl Context') {
+	stage('Create Kubernetes Cluster') {
 			steps {
 				withAWS(region:'us-east-1', credentials:'aws-user') {
 					sh '''
-						kubectl config use-context arn:aws:eks:us-east-1:270263200429:cluster/apicluster
+						eksctl create cluster \
+						--name apicluster \
+						--version 1.14 \
+						--nodegroup-name standard-workers \
+						--node-type t2.small \
+						--nodes 2 \
+						--nodes-min 1 \
+						--nodes-max 3 \
+						--node-ami auto \
+						--region us-east-1 \
+						--zones us-east-1a \
+						--zones us-east-1b \
+						--zones us-east-1c \
 					'''
 				}
 			}
 		}
 
-		stage('Deploy Blue Container') {
+		stage('Configure kubectl') {
 			steps {
 				withAWS(region:'us-east-1', credentials:'aws-user') {
 					sh '''
-						kubectl apply -f ./kubernetes-resources/blue-replication-controller.yml
+						aws eks --region us-east-1 update-kubeconfig --name apicluster
 					'''
 				}
 			}
 		}
 
-		stage('Deploy green container') {
-			steps {
-				withAWS(region:'us-east-1', credentials:'aws-user') {
-					sh '''
-						kubectl apply -f ./kubernetes-resources/green-replication-controller.yml
-					'''
-				}
-			}
-		}
 
-		stage('Create Service Pointing to Blue Replication Controller') {
-			steps {
-				withAWS(region:'us-east-1', credentials:'aws-user') {
-					sh '''
-						kubectl apply -f ./kubernetes-resources/blue-service.yml
-					'''
-				}
-			}
-		}
-
-		stage('Approval for Redirection') {
-            steps {
-                input "Ready to redirect traffic to green replication controller?"
-            }
-        }
-
-		stage('Create Service Pointing to Green Replication Controller') {
-			steps {
-				withAWS(region:'us-east-1', credentials:'aws-user') {
-					sh '''
-						kubectl apply -f ./kubernetes-resources/green-service.yml
-					'''
-				}
-			}
-		}
-    
-	    
 	    
         stage('Remove Unused docker image') {
             steps {
