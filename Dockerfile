@@ -1,20 +1,6 @@
-FROM python:3.7.3-stretch
+FROM nginx
 
-# Create a working directory
-WORKDIR /app
+RUN rm /usr/share/nginx/html/index.html
 
-# Copy source code to working directory
-COPY . /TourismAPI/ /app/
-
-
-# Install packages from requirements.txt
-# hadolint ignore=DL3013
-RUN pip install --upgrade pip &&\
-    pip install --trusted-host pypi.python.org -r requirements.txt
-
-# Expose port 80
-EXPOSE 80
-
-# Run app.py at container launch
-
-CMD ["python", "app.py"]
+# Copy source code to nginx html directory
+COPY index.html /usr/share/nginx/html
