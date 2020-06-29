@@ -18,5 +18,5 @@ spec:
                 - name: blue
                   image: gargpulkit/tourismapi
                   ports:
-                      - name: api-server
-                        containerPort: 80
+                      - name: tourismapi
+                        containerPort: 8080
