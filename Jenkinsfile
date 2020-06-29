@@ -16,15 +16,65 @@ pipeline {
                 sh './upload_docker.sh $USER_CREDENTIALS_USR $USER_CREDENTIALS_PSW'
             }
         }
-	stage('Configure kubectl') {
+	
+	stage('Set Current kubectl Context') {
 			steps {
 				withAWS(region:'us-east-1', credentials:'aws-user') {
 					sh '''
-						aws eks --region us-east-1 update-kubeconfig --name apicluster
+						kubectl config use-context arn:aws:eks:us-east-1:270263200429:cluster/apicluster
 					'''
 				}
 			}
-		}    
+		}
+
+		stage('Deploy Blue Container') {
+			steps {
+				withAWS(region:'us-east-1', credentials:'aws-user') {
+					sh '''
+						kubectl apply -f ./kubernetes-resources/blue-replication-controller.yml
+					'''
+				}
+			}
+		}
+
+		stage('Deploy green container') {
+			steps {
+				withAWS(region:'us-east-1', credentials:'aws-user') {
+					sh '''
+						kubectl apply -f ./kubernetes-resources/green-replication-controller.yml
+					'''
+				}
+			}
+		}
+
+		stage('Create Service Pointing to Blue Replication Controller') {
+			steps {
+				withAWS(region:'us-east-1', credentials:'aws-user') {
+					sh '''
+						kubectl apply -f ./kubernetes-resources/blue-service.yml
+					'''
+				}
+			}
+		}
+
+		stage('Approval for Redirection') {
+            steps {
+                input "Ready to redirect traffic to green replication controller?"
+            }
+        }
+
+		stage('Create Service Pointing to Green Replication Controller') {
+			steps {
+				withAWS(region:'us-east-1', credentials:'aws-user') {
+					sh '''
+						kubectl apply -f ./kubernetes-resources/green-service.yml
+					'''
+				}
+			}
+		}
+    
+	    
+	    
         stage('Remove Unused docker image') {
             steps {
                 sh 'docker image prune'
