@@ -16,40 +16,63 @@ pipeline {
                 sh './upload_docker.sh $USER_CREDENTIALS_USR $USER_CREDENTIALS_PSW'
             }
         }
-	    
-		stage('Create New Kubernetes Cluster') {
+	    stage('Set Current kubectl Context') {
 			steps {
 				withAWS(region:'us-east-1', credentials:'aws-user') {
 					sh '''
-						eksctl create cluster \
-						--name apicluster \
-						--version 1.14 \
-						--nodegroup-name standard-workers \
-						--node-type t2.small \
-						--nodes 2 \
-						--nodes-min 1 \
-						--nodes-max 3 \
-						--node-ami auto \
-						--region us-east-1 \
-						--zones us-east-1a \
-						--zones us-east-1b \
-						--zones us-east-1c \
+						kubectl config use-context arn:aws:eks:us-east-1:270263200429:cluster/apicluster
 					'''
 				}
 			}
 		}
 
-		stage('Configure kubectl') {
+		stage('Deploy Blue Container') {
 			steps {
 				withAWS(region:'us-east-1', credentials:'aws-user') {
 					sh '''
-						aws eks --region us-east-1 update-kubeconfig --name apicluster
+						kubectl apply -f ./blue-replication-controller.yml
 					'''
 				}
 			}
 		}
 
-	
+		stage('Deploy green container') {
+			steps {
+				withAWS(region:'us-east-1', credentials:'aws-user') {
+					sh '''
+						kubectl apply -f ./green-replication-controller.yml
+					'''
+				}
+			}
+		}
+
+		stage('Create Service Pointing to Blue Replication Controller') {
+			steps {
+				withAWS(region:'us-east-1', credentials:'aws-user') {
+					sh '''
+						kubectl apply -f ./blue-service.yml
+					'''
+				}
+			}
+		}
+
+		stage('Approval for Redirection') {
+            steps {
+                input "Ready to redirect traffic to green replication controller?"
+            }
+        }
+
+		stage('Create Service Pointing to Green Replication Controller') {
+			steps {
+				withAWS(region:'us-east-1', credentials:'aws-user') {
+					sh '''
+						kubectl apply -f ./green-service.yml
+					'''
+				}
+			}
+		}
+    
+
 	    
         stage('Remove Unused docker image') {
             steps {
