@@ -17,7 +17,7 @@ pipeline {
             }
         }
 	    
-		stage('Create Kubernetes Cluster') {
+		stage('Create New Kubernetes Cluster') {
 			steps {
 				withAWS(region:'us-east-1', credentials:'was-user') {
 					sh '''
