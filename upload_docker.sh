@@ -5,14 +5,9 @@
 
 # Create dockerpath
 
-dockerpath="gargpulkit/tourism_app"
+dockerpath="gargpulkit/udagram_app"
 
 # Authenticate & tag
-echo "Docker ID and Image: $dockerpath"
-
 docker login --username $1 --password $2 
-docker tag tourism_app $dockerpath:latest
 
-# Push image to a docker repository
-
-docker push $dockerpath:latest
+docker image push $dockerpath

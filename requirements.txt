@@ -1,9 +1,0 @@
-Flask==1.0.2
-flask_restplus
-flask_sqlalchemy
-requests
-jwt 
-datetime
-Jinja2==2.10
-jsonschema==2.6.0
-
