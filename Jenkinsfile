@@ -1,4 +1,7 @@
 pipeline {
+	environment {
+        USER_CREDENTIALS = credentials('dockerhub')
+    	}
 	agent any
 	stages {
 
@@ -22,7 +25,7 @@ pipeline {
         
 	stage('Push to Docker Hub') {
             steps {
-                sh './upload_docker.sh $CREDENTIALS_USR $CREDENTIALS_PSW'
+                sh './upload_docker.sh $USER_CREDENTIALS_USR $USER_CREDENTIALS_PSW'
             }
         }
 		
