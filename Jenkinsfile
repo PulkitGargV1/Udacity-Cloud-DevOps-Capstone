@@ -1,4 +1,7 @@
 pipeline {
+	environment {
+        USER_CREDENTIALS = credentials('dockerhub')
+    	}
 	agent any
 	stages {
 
@@ -13,6 +16,18 @@ pipeline {
 			sh 'hadolint --ignore DL3006 ./Dockerfile'
 		}
 	}
+	
+	stage('Build Docker Image') {
+            steps {
+                sh './run_docker.sh'
+            }
+        }
+        
+	stage('Push to Docker Hub') {
+            steps {
+                sh './upload_docker.sh $CREDENTIALS_USR $CREDENTIALS_PSW'
+            }
+        }
 		
 	}
 	
