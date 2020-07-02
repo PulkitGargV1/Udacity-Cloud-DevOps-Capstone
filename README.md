@@ -1,7 +1,8 @@
 This is the final capstone project for Udacity Cloud DevOps Engineer NanoDegree Program 
 
 
-In this project we will deploy Udacity - Udagram application on AWS EKS cluster
+In this project we will build Udacity - Udagram application docker image and deploy on AWS EKS cluster
+
 
 
 Step 1 
